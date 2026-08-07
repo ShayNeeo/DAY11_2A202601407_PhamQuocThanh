@@ -1,5 +1,8 @@
 # Day 11 — Controlled Agent Security (2026)
 
+**Họ và tên:** Phạm Quốc Thanh  
+**MSSV:** 2A202601407
+
 Làm sao để ứng dụng agent an toàn hơn?
 
 **Hình thức:** bài tập **cá nhân** (1 người / 1 MSSV).

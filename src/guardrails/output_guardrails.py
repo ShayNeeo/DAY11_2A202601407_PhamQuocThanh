@@ -83,7 +83,7 @@ If UNSAFE, add a brief reason on the next line.
 """
 
 safety_judge_agent = llm_agent.LlmAgent(
-    model="gemini-2.5-flash-lite",
+    model="gemini-3.5-flash-lite",
     name="safety_judge",
     instruction=SAFETY_JUDGE_INSTRUCTION,
 )
