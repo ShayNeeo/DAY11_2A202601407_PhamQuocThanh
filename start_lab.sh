@@ -30,17 +30,17 @@ echo "1️⃣ Starting FastAPI Backend on port 8000..."
 uv run python src/api.py &
 API_PID=$!
 
-# 2. Start Next.js Frontend
-echo "2️⃣ Starting Next.js Frontend on port 3000..."
+# 2. Start Next.js Frontend (listening on all interfaces 0.0.0.0)
+echo "2️⃣ Starting Next.js Frontend on port 3000 (0.0.0.0)..."
 cd frontend
-pnpm dev --port 3000 &
+pnpm dev --hostname 0.0.0.0 --port 3000 &
 FRONTEND_PID=$!
 cd ..
 
 # Wait for local servers to initialize
 sleep 3
 
-# 3. Start Cloudflare Tunnel using HTTP2 protocol (bypasses UDP/QUIC timeouts)
+# 3. Start Cloudflare Tunnel using HTTP2 protocol
 if [ -n "$CF_TUNNEL_TOKEN" ]; then
   echo "3️⃣ Exposing Frontend via Cloudflare Tunnel (HTTP2 mode)..."
   pnpm dlx cloudflared tunnel --protocol http2 run --token "$CF_TUNNEL_TOKEN"
