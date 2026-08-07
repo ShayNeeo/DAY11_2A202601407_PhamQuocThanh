@@ -129,7 +129,7 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
       );
     }
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`;
 
     const geminiRes = await fetch(apiUrl, {
       method: "POST",
@@ -145,9 +145,10 @@ export async function onRequestPost(context: { request: Request; env: Env }) {
     });
 
     if (!geminiRes.ok) {
+      const errText = await geminiRes.text();
       return new Response(
         JSON.stringify({
-          response: "An error occurred while contacting the AI model.",
+          response: `API Error (${geminiRes.status}): ${errText}`,
           leaked: false,
           status: "BLOCKED",
         }),
