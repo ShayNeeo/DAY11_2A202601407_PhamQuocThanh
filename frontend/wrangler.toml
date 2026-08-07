@@ -1,7 +1,7 @@
 name = "vinbank-redteam-arena"
-pages_build_output_dir = ".vercel/output/static"
+pages_build_output_dir = "out"
 compatibility_date = "2026-08-07"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
-# Environment variables set here or via wrangler secret put GOOGLE_API_KEY
+# Add GOOGLE_API_KEY in Cloudflare Pages dashboard
