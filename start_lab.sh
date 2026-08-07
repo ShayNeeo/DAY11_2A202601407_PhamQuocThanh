@@ -40,10 +40,10 @@ cd ..
 # Wait for local servers to initialize
 sleep 3
 
-# 3. Start Cloudflare Tunnel using pnpm dlx cloudflared
+# 3. Start Cloudflare Tunnel using HTTP2 protocol (bypasses UDP/QUIC timeouts)
 if [ -n "$CF_TUNNEL_TOKEN" ]; then
-  echo "3️⃣ Exposing Frontend via Cloudflare Tunnel..."
-  pnpm dlx cloudflared tunnel run --token "$CF_TUNNEL_TOKEN"
+  echo "3️⃣ Exposing Frontend via Cloudflare Tunnel (HTTP2 mode)..."
+  pnpm dlx cloudflared tunnel --protocol http2 run --token "$CF_TUNNEL_TOKEN"
 else
   echo "⚠️ CF_TUNNEL_TOKEN not found in .env! Running locally only."
   echo "Local URL: http://localhost:3000"
