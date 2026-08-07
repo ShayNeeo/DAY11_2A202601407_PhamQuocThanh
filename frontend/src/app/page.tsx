@@ -107,6 +107,15 @@ export default function Home() {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (input.trim() && !loading) {
+        handleSubmit(e);
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-slate-950 text-slate-100 font-sans">
       {/* Header */}
@@ -219,15 +228,16 @@ export default function Home() {
       </main>
 
       {/* Input Area */}
-      <footer className="border-t border-slate-800 bg-slate-900/80 backdrop-blur-md p-4 sticky bottom-0">
-        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto flex gap-3">
+      <footer className="border-t border-slate-800 bg-slate-900/90 backdrop-blur-md p-4 sticky bottom-0 z-20 relative">
+        <form onSubmit={handleSubmit} className="max-w-4xl mx-auto flex gap-3 items-end">
           <div className="relative flex-1">
-            <input
-              type="text"
+            <textarea
+              rows={2}
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Enter adversarial prompt / attack vector..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono"
+              onKeyDown={handleKeyDown}
+              placeholder="Enter adversarial prompt / attack vector... (Press Enter to send, Shift+Enter for new line)"
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all font-mono resize-none"
               disabled={loading}
             />
             <Sparkles className="w-4 h-4 text-indigo-500/50 absolute right-4 top-3.5 pointer-events-none" />
@@ -235,7 +245,7 @@ export default function Home() {
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600 text-white font-medium px-5 py-3 rounded-xl flex items-center gap-2 text-sm transition-all shadow-lg shadow-indigo-600/20 flex-shrink-0"
+            className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:hover:bg-indigo-600 text-white font-medium px-5 py-3.5 rounded-xl flex items-center gap-2 text-sm transition-all shadow-lg shadow-indigo-600/20 flex-shrink-0 cursor-pointer disabled:cursor-not-allowed mb-0.5"
           >
             <span>Attack</span>
             <Send className="w-4 h-4" />
