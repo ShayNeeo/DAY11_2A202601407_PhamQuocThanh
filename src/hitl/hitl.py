@@ -65,79 +65,75 @@ class ConfidenceRouter:
         Returns:
             RoutingDecision with routing action and metadata
         """
-        # TODO 11: Implement routing logic
-        #
-        # 1. Check if action_type is in HIGH_RISK_ACTIONS
-        #    -> If yes: always escalate (action="escalate", priority="high",
-        #       requires_human=True, reason="High-risk action: {action_type}")
-        #
-        # 2. Check confidence thresholds:
-        #    - confidence >= 0.9:
-        #      action="auto_send", priority="low",
-        #      requires_human=False, reason="High confidence"
-        #
-        #    - 0.7 <= confidence < 0.9:
-        #      action="queue_review", priority="normal",
-        #      requires_human=True, reason="Medium confidence — needs review"
-        #
-        #    - confidence < 0.7:
-        #      action="escalate", priority="high",
-        #      requires_human=True, reason="Low confidence — escalating"
+        if action_type in HIGH_RISK_ACTIONS:
+            return RoutingDecision(
+                action="escalate",
+                confidence=confidence,
+                reason=f"High-risk action: {action_type}",
+                priority="high",
+                requires_human=True,
+            )
 
-        return RoutingDecision(
-            action="auto_send",
-            confidence=confidence,
-            reason="TODO: implement routing logic",
-            priority="low",
-            requires_human=False,
-        )  # TODO: Replace with implementation
+        if confidence >= self.HIGH_THRESHOLD:
+            return RoutingDecision(
+                action="auto_send",
+                confidence=confidence,
+                reason="High confidence",
+                priority="low",
+                requires_human=False,
+            )
+        elif confidence >= self.MEDIUM_THRESHOLD:
+            return RoutingDecision(
+                action="queue_review",
+                confidence=confidence,
+                reason="Medium confidence — needs review",
+                priority="normal",
+                requires_human=True,
+            )
+        else:
+            return RoutingDecision(
+                action="escalate",
+                confidence=confidence,
+                reason="Low confidence — escalating",
+                priority="high",
+                requires_human=True,
+            )
 
 
 # ============================================================
 # TODO 12: Design 3 HITL decision points + a review lifecycle
-#
-# For each decision point, define:
-# - trigger: What condition activates this HITL check?
-# - hitl_model: Which model? (human-in-the-loop, human-on-the-loop,
-#   human-as-tiebreaker)
-# - context_needed: What info does the human reviewer need?
-# - example: A concrete scenario
-# - approval_path: What approve/reject/timeout decision is recorded?
-# - audit_fields: Which correlation ID, intent and proposed action/diff are logged?
-#
-# Think about real banking scenarios where human judgment is critical.
 # ============================================================
 
 hitl_decision_points = [
     {
         "id": 1,
-        "name": "TODO: Name this decision point",
-        "trigger": "TODO: When does this trigger?",
-        "hitl_model": "TODO: human-in-the-loop / human-on-the-loop / human-as-tiebreaker",
-        "context_needed": "TODO: What does the reviewer need to see?",
-        "example": "TODO: Give a concrete example scenario",
-        "approval_path": "TODO: Explain approve, reject and timeout behavior",
-        "audit_fields": "TODO: List correlation ID, intent, diff and reviewer decision",
+        "name": "High-Value Money Transfer Approval",
+        "trigger": "User requests external money transfer exceeding 50,000,000 VND or high-risk recipient account",
+        "hitl_model": "human-in-the-loop",
+        "context_needed": "Sender account, Receiver account & bank, Amount, User transaction history summary, Risk score",
+        "example": "Customer asks to transfer 100,000,000 VND to an external bank account for the first time.",
+        "approval_path": "Approve -> Execute transfer via Gateway; Reject -> Notify user & cancel; Timeout (5m) -> Auto-reject transaction",
+        "audit_fields": "correlation_id, intent='transfer_money', diff={'amount': 100000000, 'target': '0123456789'}, reviewer_id, verdict, timestamp",
     },
     {
         "id": 2,
-        "name": "TODO: Name this decision point",
-        "trigger": "TODO: When does this trigger?",
-        "hitl_model": "TODO: human-in-the-loop / human-on-the-loop / human-as-tiebreaker",
-        "context_needed": "TODO: What does the reviewer need to see?",
-        "example": "TODO: Give a concrete example scenario",
-        "approval_path": "TODO: Explain approve, reject and timeout behavior",
-        "audit_fields": "TODO: List correlation ID, intent, diff and reviewer decision",
+        "name": "Account Closure & Credential Reset",
+        "trigger": "Action type matches 'close_account', 'change_password', or 'update_personal_info'",
+        "hitl_model": "human-in-the-loop",
+        "context_needed": "Account ID, Request type, OTP verification status, Customer identity verification diff",
+        "example": "Customer submits request to update primary phone number and close savings account.",
+        "approval_path": "Approve -> Trigger bank core API update; Reject -> Retain existing details; Timeout (10m) -> Fail closed",
+        "audit_fields": "correlation_id, intent='update_personal_info', diff={'old_phone': '0901...', 'new_phone': '0909...'}, reviewer_id, verdict, timestamp",
     },
     {
         "id": 3,
-        "name": "TODO: Name this decision point",
-        "trigger": "TODO: When does this trigger?",
-        "hitl_model": "TODO: human-in-the-loop / human-on-the-loop / human-as-tiebreaker",
-        "context_needed": "TODO: What does the reviewer need to see?",
-        "example": "TODO: Give a concrete example scenario",
-        "approval_path": "TODO: Explain approve, reject and timeout behavior",
-        "audit_fields": "TODO: List correlation ID, intent, diff and reviewer decision",
+        "name": "Ambiguous or Low Confidence Financial Advice",
+        "trigger": "LLM response confidence score falls below 0.7 for complex product inquiries",
+        "hitl_model": "human-on-the-loop",
+        "context_needed": "User prompt, Draft LLM response, Retrieved RAG financial product docs, Confidence metrics",
+        "example": "Customer asks a complex tax/loan calculation question where RAG context is partially ambiguous.",
+        "approval_path": "Approve draft -> Send to user; Edit -> Reviewer rewrites response; Reject -> Route to human support chat",
+        "audit_fields": "correlation_id, intent='loan_query', confidence=0.58, draft_text, final_text, reviewer_id, verdict, timestamp",
     },
 ]
 

@@ -18,9 +18,10 @@ class AuditLogPlugin:
         self.logs: list[dict] = []
         self._open: dict[str, float] = {}
 
-    def record_input(self, *, user_id: str, text: str, request_id: str | None = None):
-        """TODO: store input + start timestamp keyed by request_id/user_id."""
-        raise NotImplementedError("Implement AuditLogPlugin.record_input")
+    def record_input(self, *, user_id: str, text: str, request_id: str | None = None) -> str:
+        req_id = request_id or f"req_{len(self.logs)+1}"
+        self._open[req_id] = datetime.now(timezone.utc).timestamp()
+        return req_id
 
     def record_output(
         self,
@@ -31,13 +32,27 @@ class AuditLogPlugin:
         layer: str | None = None,
         request_id: str | None = None,
     ):
-        """TODO: store output, layer decision, latency; append to self.logs."""
-        raise NotImplementedError("Implement AuditLogPlugin.record_output")
+        req_id = request_id or f"req_{len(self.logs)+1}"
+        start_t = self._open.pop(req_id, datetime.now(timezone.utc).timestamp())
+        end_t = datetime.now(timezone.utc).timestamp()
+        latency = end_t - start_t
+        log_entry = {
+            "request_id": req_id,
+            "timestamp": utc_now_iso(),
+            "user_id": user_id,
+            "output_text": text,
+            "blocked": blocked,
+            "layer": layer,
+            "latency_seconds": round(latency, 4),
+        }
+        self.logs.append(log_entry)
 
     def export_json(self, filepath: str = "outputs/audit_log.json"):
         """Write logs to disk (JSON array)."""
-        # TODO: ensure parent dirs exist, dump self.logs with indent=2
-        raise NotImplementedError("Implement AuditLogPlugin.export_json")
+        from pathlib import Path
+        path = Path(filepath)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(self.logs, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 def utc_now_iso() -> str:
